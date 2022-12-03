@@ -28,11 +28,11 @@ def get_upcomming_contests():
         cols = row.find_all('td')
         
         name = cols[0].text
-        contest_url = ""
+        contest_url = url.format(1)
 
         time = cols[2].text.strip()
         length = cols[3].text.strip()
-        participants = ""
+        participants = "0"
         # participants = re.findall(r'\d+', participants)[0]
         
         nremove = ["Virtual participation »","Enter »","\n","\r"]
@@ -40,6 +40,8 @@ def get_upcomming_contests():
             name = name.replace(s, "")
         name = name.strip()
         
+        name = name + " (Upcoming)"
+
         contest = {
             "name": name,
             "url": contest_url,
@@ -98,8 +100,6 @@ def get_data(url):
 
 
 def main():
-    get_upcomming_contests()
-    
     threads = []
     for i in range(0,18):
         if i == 0:
