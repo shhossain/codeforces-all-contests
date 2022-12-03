@@ -177,7 +177,7 @@ function showContests(contests) {
   for (let i = 0; i < contests.length; i++) {
     let contest = contests[i];
     let row = document.createElement("tr");
-    row.innerHTML = `<td>${i + 1}</td>
+    row.innerHTML = `
       <td><a href="${contest.getUrl()}" target="_blank">${contest.name}</a></td>
       <td><a href="${contest.getTimeLink()}" target="_blank">${
       contest.time
