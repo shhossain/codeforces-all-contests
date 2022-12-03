@@ -1,32 +1,3 @@
-class Contest {
-  constructor(name, url, time, length, participants) {
-    this.name = name;
-    this.url = url;
-    this.time = time;
-    this.length = length;
-    this.participants = participants;
-  }
-
-  getUrl() {
-    if (this.url[0] == "h") {
-      return this.url;
-    } else {
-      return "https://codeforces.com" + this.url;
-    }
-  }
-}
-
-function matchName(name, query) {
-  // only letters and numbers
-  let freshName = name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-  let freshQuery = query.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-
-  // match
-  if (freshName.includes(freshQuery)) {
-    return true;
-  }
-}
-
 const monthMap = {
   Jan: "01",
   Feb: "02",
@@ -41,6 +12,50 @@ const monthMap = {
   Nov: "11",
   Dec: "12",
 };
+
+class Contest {
+  constructor(name, url, time, length, participants) {
+    this.name = name;
+    this.url = url;
+    this.time = time; //	Jan/05/2023 17:35
+    this.length = length;
+    this.participants = participants;
+  }
+
+  getUrl() {
+    if (this.url[0] == "h") {
+      return this.url;
+    } else {
+      return "https://codeforces.com" + this.url;
+    }
+  }
+
+  getMonthDayYearHourMinute() {
+    let dateHour = this.time.split(" ");
+    let month = monthMap[dateHour[0].split("/")[0]];
+    let day = dateHour[0].split("/")[1];
+    let year = dateHour[0].split("/")[2];
+    let hour = dateHour[1].split(":")[0];
+    let minute = dateHour[1].split(":")[1];
+    return [month, day, year, hour, minute];
+  }
+
+  getTimeLink() {
+    let date = this.getMonthDayYearHourMinute();
+    return `https://www.timeanddate.com/worldclock/fixedtime.html?day=${date[1]}&month=${date[0]}&year=${date[2]}&hour=${date[3]}&min=${date[4]}&sec=0&p1=166`;
+  }
+}
+
+function matchName(name, query) {
+  // only letters and numbers
+  let freshName = name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  let freshQuery = query.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+
+  // match
+  if (freshName.includes(freshQuery)) {
+    return true;
+  }
+}
 
 function matchTime(timeFormat, queryFormat) {
   // Oct/11/2010 17:00 normal format
@@ -164,14 +179,16 @@ function showContests(contests) {
     let row = document.createElement("tr");
     row.innerHTML = `<td>${i + 1}</td>
       <td><a href="${contest.getUrl()}" target="_blank">${contest.name}</a></td>
-      <td>${contest.time}</td>
+      <td><a href="${contest.getTimeLink()}" target="_blank">${
+      contest.time
+    }</a></td>
       <td>${contest.length}</td>
       <td>${contest.participants}</td>`;
     contestsTable.appendChild(row);
   }
 
   // show total contests
-    totalContestsNo.innerHTML = contests.length;
+  totalContestsNo.innerHTML = contests.length;
 }
 
 sortContests("time", false);
@@ -284,7 +301,7 @@ sortButtons.forEach((button) => {
     let sort = e.target.parentElement.parentElement.innerText.toLowerCase();
     //   console.log("sort", sort);
 
-    // console.log("sort", sort);
+    console.log("sort", sort);
     const asc = e.target.classList.contains("bi-sort-up");
     sortContests(sort, asc);
     showContests(currentContests);

@@ -47,7 +47,7 @@ def get_upcomming_contests():
             "url": contest_url,
             "time": time.replace('\n', ' ').replace('\r', '')[:17],
             "length": length,
-            "participants": participants
+            "participants": int(participants)
         }
         
         data.append(contest)
@@ -93,7 +93,7 @@ def get_data(url):
             "url": contest_url,
             "time": time.replace('\n', ' ').replace('\r', '')[:17],
             "length": length,
-            "participants": participants
+            "participants": int(participants)
         }
         
         data.append(contest)
