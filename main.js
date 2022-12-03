@@ -299,9 +299,6 @@ const sortButtons = document.querySelectorAll(".sort");
 sortButtons.forEach((button) => {
   button.addEventListener("click", (e) => {
     let sort = e.target.parentElement.parentElement.innerText.toLowerCase();
-    //   console.log("sort", sort);
-
-    console.log("sort", sort);
     const asc = e.target.classList.contains("bi-sort-up");
     sortContests(sort, asc);
     showContests(currentContests);
