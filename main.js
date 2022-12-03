@@ -171,7 +171,7 @@ function showContests(contests) {
   }
 
   // show total contests
-  //   totalContestsNo.innerHTML = contests.length;
+    totalContestsNo.innerHTML = contests.length;
 }
 
 sortContests("time", false);
