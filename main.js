@@ -451,8 +451,11 @@ sortButtons.forEach((button) => {
 // search guide
 const searchGuideButton = document.querySelector("#search-guide-button");
 searchGuideButton.addEventListener("click", () => {
-  searchGuideButton.classList.toggle("d-none");
-  showSearchGuide();
+  try {
+    showSearchGuide();
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 function showSearchGuide() {
@@ -469,43 +472,37 @@ function showSearchGuide() {
     div4 or div3 not upcoming
     div4 or div3 not //2020
     `;
-  // add text-muted to every line
   guide = guide
     .split("\n")
     .map((line) => {
-      return `<p class="text-muted">${line}</p>`;
+      if (line.trim().length == 0) {
+        return "";
+      }
+      return `<div class="card text-white bg-dark mb-3">
+      <div class="card-body">
+        <div class="card-text">${line}</div>
+      </div>
+    </div>`;
     })
     .join("");
 
-  // show search guide in black not with white text, "or","not" should be in red
+  const searchGuide = document.querySelector("#search-guide");
+  searchGuide.innerHTML = guide;
 
-  // show modal
-  // create modal on the fly
-  const modal = `
-    <div class="modal fade" id="searchGuideModal" tabindex="-1" aria-labelledby="searchGuideModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="searchGuideModalLabel">Search Guide</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              ${guide}
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-                </div>
-                </div>
-                </div>
-                `;
-
-  // add modal to body
-  document.body.innerHTML += modal;
-  // show modal
-
+  // exampleModal
   const searchGuideModal = new bootstrap.Modal(
-    document.getElementById("searchGuideModal")
+    document.getElementById("exampleModal"),
+    {
+      keyboard: false,
+    }
   );
   searchGuideModal.show();
+
+  // class close button
+  const closeButton = document.querySelectorAll(".close");
+  closeButton.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      searchGuideModal.hide();
+    });
+  });
 }
