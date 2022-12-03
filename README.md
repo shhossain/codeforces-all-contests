@@ -2,4 +2,4 @@
 This repository contains all the contests of Codeforces in a single place.
 
 ## Link
-[Codeforces All Contests](/
+[Codeforces All Contests](https://shhossain.github.io/codeforces-all-contests/)
