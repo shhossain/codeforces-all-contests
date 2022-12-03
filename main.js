@@ -241,6 +241,10 @@ function advancedSearch(contests, searchString) {
     searchString = searchString.replace(replacev, "");
   }
 
+  searchString = searchString.trim();
+  //   console.log("isNot", isNot, isNotq);
+  //   console.log("searchString", searchString);
+
   if (searchString.includes(" or ")) {
     // or
     let queries = searchString.split(" or ");
