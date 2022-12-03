@@ -1,0 +1,109 @@
+<!-- index page for showing contests -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css"
+    />
+
+    <title>Codeforces Contests</title>
+  </head>
+  <body>
+    <!-- navbar for total contests search -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Codeforces Contests</a>
+        <div id="total-contests"></div>
+        <!-- search bar -->
+        <div class="d-flex">
+          <input
+            class="form-control me-2"
+            type="text"
+            placeholder="Search"
+            aria-label="Search"
+            id="search"
+          />
+        </div>
+      </div>
+    </nav>
+
+    <!-- table for showing contests, show only header. contests will load from js -->
+    
+    <div class="container-fluid">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">
+            <!-- No. and btn -->
+         
+              <div class="pb-2">No. </div>
+            
+          </th>
+          <th scope="col">
+            <div class="d-flex">
+              <div class="me-2">Name</div>
+              <button
+                class="btn btn-outline-secondary btn-sm sort bi bi-sort-down"
+                type="button"
+                id="name"
+              >
+              </button>
+            </div>
+          </th>
+          <th scope="col">
+            <div class="d-flex">
+              <div class="me-2">Time</div>
+              <button
+                class="btn btn-primary btn-sm sort bi bi-sort-up"
+                type="button"
+                id="time"
+              >
+                </button>
+            </div>
+          </th>
+          <th scope="col"><div class="d-flex">
+            <div class="me-2">Length</div>
+            <button
+              class="btn btn-outline-secondary btn-sm sort bi bi-sort-up"
+              type="button"
+            id="length"
+            >
+              
+              </button>
+          </div></th>
+          <th scope="col">
+            <div class="d-flex">
+            <div class="me-2">Participants</div>
+            <button
+              class="btn btn-outline-secondary btn-sm sort bi bi-sort-up"
+              type="button"
+                id="participants"
+            >
+              </button>
+          </div></th>
+        </tr>
+      </thead>
+      <tbody id="contests"></tbody>
+    </table>
+    </div>
+
+    <!-- main.js -->
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
