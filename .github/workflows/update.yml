@@ -1,8 +1,8 @@
 name: "Update Data"
 on:
   schedule:
-    - cron: "*/2 * * * *"
-  workflow_dispatch:
+    - cron: "3 * * * *"
+
 
 jobs:
   Update:
@@ -21,6 +21,8 @@ jobs:
         run: python main.py
       - name: Commit changes
         run: |
+          git config --local user.email "hossain0338@gmail.com"
+          git config --local user.name "shhossain"
           git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/codeforces-all-contests.git
           git add .
           git commit -m "Update data.js"
