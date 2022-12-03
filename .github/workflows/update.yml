@@ -1,0 +1,27 @@
+name: "Update Data"
+on:
+  schedule:
+  - cron: "*/10 * * * *"
+
+jobs:
+  Update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: |
+          pip install BeautifulSoup4
+          pip install requests
+      - name: Update data.js
+        run: python main.py
+      - name: Commit changes
+        run: |
+          git remote set-url origin https://${{secrets.COMMIT_SECRET}}@github.com/shhossain/codeforces-all-contests.git
+          git add .
+          git commit -m "Update data.js"
+          git push origin main
+
