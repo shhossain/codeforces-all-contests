@@ -1,7 +1,7 @@
 name: "Update Data"
 on:
   schedule:
-  - cron: "*/10 * * * *"
+  - cron: '0 */2 * ? * *'
 
 jobs:
   Update:
