@@ -25,12 +25,13 @@ class DefaultDict {
 }
 
 class Contest {
-  constructor(name, url, time, length, participants) {
+  constructor(name, url, time, length, participants, participants_url) {
     this.name = name;
     this.url = url;
     this.time = time; //	Jan/05/2023 17:35
     this.length = length;
     this.participants = participants;
+    this.participants_url = participants_url;
   }
 
   getUrl() {
@@ -38,6 +39,14 @@ class Contest {
       return this.url;
     } else {
       return "https://codeforces.com" + this.url;
+    }
+  }
+
+  getParticipantsUrl() {
+    if (this.participants_url[0] == "h") {
+      return this.participants_url;
+    } else {
+      return "https://codeforces.com" + this.participants_url;
     }
   }
 
@@ -179,7 +188,8 @@ data.forEach((contest) => {
       contest.url,
       contest.time,
       contest.length,
-      contest.participants
+      contest.participants,
+      contest.participants_url
     )
   );
 });
@@ -197,8 +207,10 @@ let searchSpinner = document.getElementById("search-spinner");
 let currentSearchQuery = "";
 let previousSearchQuery = new DefaultDict(0);
 let MAX_SEARCH_QUERY = 20;
+let activeSort = "time";
+let activeSortAsc = false;
 
-function showContests(contests) {
+function renderContests(contests) {
   // show contests in table
   contestsTable.innerHTML = "";
   currentContests = contests;
@@ -211,7 +223,16 @@ function showContests(contests) {
       contest.time
     }</a></td>
       <td>${contest.length}</td>
-      <td>${contest.participants}</td>`;
+    `;
+    // if participants are present add link
+    if (contest.participants) {
+      row.innerHTML += `<td><a href="${contest.getParticipantsUrl()}" target="_blank">${
+        contest.participants
+      }</a></td>`;
+    } else {
+      row.innerHTML += `<td>${contest.participants}</td>`;
+    }
+
     contestsTable.appendChild(row);
   }
 
@@ -220,7 +241,7 @@ function showContests(contests) {
 }
 
 sortContests("time", false);
-showContests(contests);
+renderContests(contests);
 
 // advanced search
 function newSearch(contests, query) {
@@ -231,7 +252,7 @@ function newSearch(contests, query) {
     return newContests;
   }
 
-  console.log("query", query);
+  // console.log("query", query);
 
   if (query.includes(" or ")) {
     let parts = query.split(" or ");
@@ -405,7 +426,9 @@ function queueTimer(contests, searchString) {
     let filterContests = querySearch(contests, searchString);
     hideSpinner();
     if (filterContests) {
-      showContests(filterContests);
+      currentContests = filterContests;
+      sortContests(activeSort, activeSortAsc);
+      renderContests(filterContests);
     }
     searchingStarted = false;
   } else {
@@ -434,7 +457,7 @@ search.addEventListener("keyup", (e) => {
     }
   } else {
     console.log("empty");
-    showContests(contests);
+    renderContests(contests);
     sortContests("time", false);
   }
 });
@@ -445,8 +468,11 @@ sortButtons.forEach((button) => {
   button.addEventListener("click", (e) => {
     let sort = e.target.parentElement.parentElement.innerText.toLowerCase();
     const asc = e.target.classList.contains("bi-sort-up");
+    activeSort = sort;
+    activeSortAsc = asc;
+
     sortContests(sort, asc);
-    showContests(currentContests);
+    renderContests(currentContests);
     if (asc) {
       e.target.classList.remove("bi-sort-up");
       e.target.classList.add("bi-sort-down");
