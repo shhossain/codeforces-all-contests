@@ -427,7 +427,6 @@ function queueTimer(contests, searchString) {
     hideSpinner();
     if (filterContests) {
       currentContests = filterContests;
-      sortContests(activeSort, activeSortAsc);
       renderContests(filterContests);
     }
     searchingStarted = false;
