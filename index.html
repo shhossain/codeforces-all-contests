@@ -17,6 +17,16 @@
     <!-- favicon -->
     <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
     <!-- css -->
+    <style>
+      .pos-rel{
+        position: relative;
+      }
+      .pos-abs{
+        position: absolute;
+        right: 18%;
+      }
+
+    </style>
 
     <title>Codeforces Contests</title>
   </head>
@@ -71,13 +81,21 @@
     <div class="container">
       <div class="d-flex m-2">
         <div class="flex-fill">
-          <input
-            class="form-control"
-            type="text"
-            placeholder="Search"
-            aria-label="Search"
-            id="search"
-          />
+          <div class="d-flex align-items-center">
+            <input
+              class="form-control pos-rel"
+              type="text"
+              placeholder="Search"
+              aria-label="Search"
+              id="search"
+            />
+            <div
+              class="spinner-border spinner-border-sm pos-abs text-secondary d-none"
+              role="status"
+              aria-hidden="true"
+              id="search-spinner"
+            ></div>
+          </div>
         </div>
         <div class="">
           <button

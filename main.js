@@ -191,6 +191,9 @@ const search = document.getElementById("search");
 let currentContests = contests;
 let loaded = false;
 let searching = false;
+let searchingStarted = false;
+let searchingDelay = 0;
+let searchSpinner = document.getElementById("search-spinner");
 let currentSearchQuery = "";
 let previousSearchQuery = new DefaultDict(0);
 let MAX_SEARCH_QUERY = 20;
@@ -220,126 +223,106 @@ sortContests("time", false);
 showContests(contests);
 
 // advanced search
-function advancedSearch(contests, searchString) {
-  if (previousSearchQuery[searchString] != 0) {
-    return previousSearchQuery[searchString];
+function newSearch(contests, query) {
+  query = query.toLowerCase().trim();
+
+  if (previousSearchQuery[query] != 0) {
+    let newContests = previousSearchQuery[query];
+    return newContests;
   }
 
-  if (searching) {
-    return;
+  console.log("query", query);
+
+  if (query.includes(" or ")) {
+    let parts = query.split(" or ");
+    let leftContests = newSearch(contests, parts[0]);
+    let rightContests = newSearch(contests, parts[1]);
+    let newContests = Array.from(new Set([...leftContests, ...rightContests]));
+    return newContests;
   }
 
-  // if / or -  or space is used, then match time else match name
-  searching = true;
-  let filteredContests = [];
-  let isNot = false;
-  let isNotq = "";
-  if (searchString.includes("not ")) {
-    isNot = true;
-    isNotq = searchString.split("not ")[1];
-    let replacev = "not " + isNotq;
-    searchString = searchString.replace(replacev, "");
-  }
+  if (query.includes("not ")) {
+    let parts = query.split("not ");
+    let part2 = parts.slice(1).join(" ");
+    let leftContests = newSearch(contests, parts[0]);
+    let rightContests = newSearch(contests, part2);
 
-  searchString = searchString.trim();
-  //   console.log("isNot", isNot, isNotq);
-  //   console.log("searchString", searchString);
+    let newContests = [];
+    let leftMap = new DefaultDict(0);
+    let rightMap = new DefaultDict(0);
 
-  if (searchString.includes(" or ")) {
-    // or
-    let queries = searchString.split(" or ");
-    for (let i = 0; i < queries.length; i++) {
-      let query = queries[i];
-      // time and name
-      if (query.includes(" ") && query.includes("/")) {
-        let splits = query.split(" ");
-        let time = splits[splits.length - 1];
-        let name = splits.slice(0, splits.length - 1).join(" ");
-        for (let j = 0; j < contests.length; j++) {
-          let contest = contests[j];
-          if (matchTime(contest.time, time) && matchName(contest.name, name)) {
-            filteredContests.push(contest);
-          }
-        }
-      } else if (query.includes("/")) {
-        // time
-        for (let j = 0; j < contests.length; j++) {
-          let contest = contests[j];
-          if (matchTime(contest.time, query)) {
-            filteredContests.push(contest);
-          }
-        }
-      } else {
-        // name
-        for (let j = 0; j < contests.length; j++) {
-          let contest = contests[j];
-          if (matchName(contest.name, query)) {
-            filteredContests.push(contest);
-          }
-        }
+    for (let i = 0; i < leftContests.length; i++) {
+      leftMap[leftContests[i].name] = 1;
+    }
+    for (let i = 0; i < rightContests.length; i++) {
+      rightMap[rightContests[i].name] = 1;
+    }
+
+    for (let i = 0; i < leftContests.length; i++) {
+      if (rightMap[leftContests[i].name] == 0) {
+        newContests.push(leftContests[i]);
       }
     }
-  } else if (searchString.includes("/") && searchString.includes(" ")) {
-    // match time and name
-    let splits = searchString.split(" ");
-    // time is last
-    let time = splits[splits.length - 1];
-    let name = splits.slice(0, splits.length - 1).join(" ");
+    return newContests;
+  }
+
+  if (query.includes(" and ") || query.includes(" ")) {
+    let parts = query.includes(" and ")
+      ? query.split(" and ")
+      : query.split(" ");
+    // part2 is the remaining parts
+    let part2 = parts.slice(1).join(" ");
+
+    console.log("and parts", parts[0], part2);
+    let leftContests = newSearch(contests, parts[0]);
+    let rightContests = newSearch(contests, part2);
+
+    let newContests = [];
+    let leftMap = new DefaultDict(0);
+    let rightMap = new DefaultDict(0);
+
+    for (let i = 0; i < leftContests.length; i++) {
+      leftMap[leftContests[i].name] = 1;
+    }
+    for (let i = 0; i < rightContests.length; i++) {
+      rightMap[rightContests[i].name] = 1;
+    }
+
     for (let i = 0; i < contests.length; i++) {
       let contest = contests[i];
-      if (matchName(contest.name, name) && matchTime(contest.time, time)) {
-        filteredContests.push(contest);
+      if (leftMap[contest.name] && rightMap[contest.name]) {
+        newContests.push(contest);
       }
     }
-  } else if (searchString.includes("/") || searchString.includes("-")) {
-    filteredContests = contests.filter((contest) => {
-      return matchTime(contest.time, searchString);
-    });
-  } else if (searchString.length > 2) {
-    filteredContests = contests.filter((contest) => {
-      return matchName(contest.name, searchString);
-    });
-  }
-  if (isNot) {
-    let filteredContests2 = [];
-    if (isNotq.includes("/") && isNotq.includes(" ")) {
-      // match time and name
-      let splits = isNotq.split(" ");
-      // time is last
-      let time = splits[splits.length - 1];
-      let name = splits.slice(0, splits.length - 1).join(" ");
-      for (let i = 0; i < filteredContests.length; i++) {
-        let contest = filteredContests[i];
-        if (!matchName(contest.name, name) && !matchTime(contest.time, time)) {
-          filteredContests2.push(contest);
-        }
-      }
-    } else if (isNotq.includes("/") || isNotq.includes("-")) {
-      filteredContests2 = filteredContests.filter((contest) => {
-        return !matchTime(contest.time, isNotq);
-      });
-    } else {
-      filteredContests2 = filteredContests.filter((contest) => {
-        return !matchName(contest.name, isNotq);
-      });
-    }
-    filteredContests = filteredContests2;
+    return newContests;
   }
 
-  previousSearchQuery[searchString] = filteredContests;
-  // if previous search query is more than 10, then remove the oldest one
+  if (query.includes("/")) {
+    return contests.filter((contest) => {
+      return matchTime(contest.time, query);
+    });
+  }
+
+  if (query.length > 0) {
+    return contests.filter((contest) => {
+      return matchName(contest.name, query);
+    });
+  }
+
+  return [];
+}
+
+function querySearch(contests, query) {
+  searching = true;
+  let newContests = newSearch(contests, query);
+  previousSearchQuery[query] = newContests;
   if (Object.keys(previousSearchQuery).length > MAX_SEARCH_QUERY) {
     let keys = Object.keys(previousSearchQuery);
     delete previousSearchQuery[keys[0]];
   }
-
   searching = false;
-  return filteredContests;
+  return newContests;
 }
-
-// function search(contests, query) {
-
-// }
 
 // sort by name, time, length, participants
 function sortContests(sort, asc = false) {
@@ -408,21 +391,49 @@ function removeOtherActiveButtons(button) {
   });
 }
 
+function showSpinner() {
+  searchSpinner.classList.remove("d-none");
+}
+
+function hideSpinner() {
+  searchSpinner.classList.add("d-none");
+}
+
+function queueTimer(contests, searchString) {
+  if (searchingDelay <= 0) {
+    currentSearchQuery = searchString;
+    let filterContests = querySearch(contests, searchString);
+    hideSpinner();
+    if (filterContests) {
+      showContests(filterContests);
+    }
+    searchingStarted = false;
+  } else {
+    showSpinner();
+    searchingDelay -= 100;
+
+    setTimeout(function () {
+      queueTimer(contests, searchString);
+    }, 100);
+  }
+}
+
 // event listeners
 // search bar event listener
 search.addEventListener("keyup", (e) => {
   const searchString = e.target.value.toLowerCase().trim();
-  // min 3 characters
+  searchingDelay = 500;
   if (searchString.length > 0) {
-    if (searchString == currentSearchQuery) {
+    if (searchString == currentSearchQuery || searching || searchString < 2) {
       return;
     }
-    currentSearchQuery = searchString;
-    const filteredContests = advancedSearch(contests, searchString);
-    if (filteredContests) {
-      showContests(filteredContests);
+
+    if (searchingStarted == false) {
+      searchingStarted = true;
+      queueTimer(contests, searchString);
     }
   } else {
+    console.log("empty");
     showContests(contests);
     sortContests("time", false);
   }
@@ -510,3 +521,10 @@ function showSearchGuide() {
     });
   });
 }
+
+// "/" key event listener to focus on search bar
+document.addEventListener("keydown", (e) => {
+  if (e.key == "/") {
+    search.focus();
+  }
+});
