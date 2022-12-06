@@ -383,7 +383,7 @@ function newSearch(contests, query) {
     // part2 is the remaining parts
     let part2 = parts.slice(1).join(" ");
 
-    console.log("and parts", parts[0], part2);
+    // console.log("and parts", parts);
     let leftContests = newSearch(contests, parts[0]);
     let rightContests = newSearch(contests, part2);
 
@@ -566,7 +566,7 @@ search.addEventListener("keyup", (e) => {
 input_box_events = ["paste", "cut"];
 input_box_events.forEach((event) => {
   search.addEventListener(event, (e) => {
-    console.log("event", event);
+    // console.log("event", event);
     search.dispatchEvent(new Event("keyup"));
   });
 });
