@@ -101,6 +101,9 @@ function matchTime(timeFormat, queryFormat) {
   let qmonth = parseInt(query[0]);
   let qday = parseInt(query[1]);
   let qyear = parseInt(query[2]) % 2000;
+  if (qyear < 10) {
+    qyear += 10;
+  }
 
   if (qmonth == tmonth && !qday && !qyear) {
     return true;
@@ -205,12 +208,34 @@ let searchingStarted = false;
 let searchingDelay = 0;
 let searchSpinner = document.getElementById("search-spinner");
 let currentSearchQuery = "";
+let searchCleared = false;
 let previousSearchQuery = new DefaultDict(0);
 let MAX_SEARCH_QUERY = 20;
 let activeSort = "time";
 let activeSortAsc = false;
+const sortButtons = document.querySelectorAll(".sort");
+const currentSearch = document.getElementById("current-search");
+
+function setParams(key, value) {
+  let url = new URL(window.location.href);
+  url.searchParams.set(key, value);
+  window.history.pushState({}, "", url);
+}
+
+function removeParams(key) {
+  let url = new URL(window.location.href);
+  url.searchParams.delete(key);
+  window.history.pushState({}, "", url);
+}
 
 function renderContests(contests) {
+  // set params search, sort, asc
+  searchCleared
+    ? removeParams("search")
+    : setParams("search", currentSearchQuery);
+  setParams("sort", activeSort);
+  setParams("asc", activeSortAsc);
+
   // show contests in table
   contestsTable.innerHTML = "";
   currentContests = contests;
@@ -240,8 +265,72 @@ function renderContests(contests) {
   totalContestsNo.innerHTML = contests.length;
 }
 
-sortContests("time", false);
-renderContests(contests);
+// on document load
+document.addEventListener("DOMContentLoaded", () => {
+  let currentUrl = new URLSearchParams(window.location.search);
+
+  if (currentUrl.has("search")) {
+    currentSearchQuery = currentUrl.get("search");
+  } else {
+    searchCleared = true;
+  }
+
+  if (currentUrl.has("sort")) {
+    activeSort = currentUrl.get("sort");
+  }
+
+  if (currentUrl.has("asc")) {
+    activeSortAsc = currentUrl.get("asc") == "true";
+  }
+
+  // console.log("query", currentSearchQuery);
+  // console.log("sort", activeSort);
+  // console.log("asc", activeSortAsc);
+
+  currentContests = currentSearchQuery
+    ? querySearch(contests, currentSearchQuery)
+    : contests;
+  sortContests(activeSort, activeSortAsc);
+  currentSearch.innerText = `"${currentSearchQuery}"`;
+
+  // if (asc) {
+  //   e.target.classList.remove("bi-sort-up");
+  //   e.target.classList.add("bi-sort-down");
+  //   e.target.classList.remove("btn-primary");
+  //   e.target.classList.add("btn-outline-secondary");
+  // } else {
+  //   e.target.classList.remove("bi-sort-down");
+  //   e.target.classList.add("bi-sort-up");
+
+  //   e.target.classList.remove("btn-outline-secondary");
+  //   e.target.classList.add("btn-primary");
+  //   removeOtherActiveButtons(e.target);
+  // }
+
+  for (let i = 0; i < sortButtons.length; i++) {
+    // name is parent text
+    let name = sortButtons[i].parentElement.innerText.toLowerCase();
+    if (name == activeSort) {
+      if (activeSortAsc) {
+        sortButtons[i].classList.remove("bi-sort-up");
+        sortButtons[i].classList.add("bi-sort-down");
+        sortButtons[i].classList.remove("btn-primary");
+        sortButtons[i].classList.add("btn-outline-secondary");
+      } else {
+        sortButtons[i].classList.remove("btn-outline-secondary");
+        sortButtons[i].classList.add("btn-primary");
+        sortButtons[i].classList.remove("bi-sort-down");
+        sortButtons[i].classList.add("bi-sort-up");
+        removeOtherActiveButtons(sortButtons[i]);
+      }
+    }
+  }
+
+  // change search input value
+  search.value = currentSearchQuery;
+
+  renderContests(currentContests);
+});
 
 // advanced search
 function newSearch(contests, query) {
@@ -334,6 +423,7 @@ function newSearch(contests, query) {
 }
 
 function querySearch(contests, query) {
+  // console.log("queryq", query);
   searching = true;
   let newContests = newSearch(contests, query);
   previousSearchQuery[query] = newContests;
@@ -420,14 +510,23 @@ function hideSpinner() {
   searchSpinner.classList.add("d-none");
 }
 
-function queueTimer(contests, searchString) {
+function queueTimer(contests, e) {
   if (searchingDelay <= 0) {
+    let searchString = e.target.value.toLowerCase().trim();
+    // change url search params
+    setParams("search", searchString);
     currentSearchQuery = searchString;
     let filterContests = querySearch(contests, searchString);
     hideSpinner();
     if (filterContests) {
       currentContests = filterContests;
+      currentSearch.innerText = `"${searchString}"`;
       renderContests(filterContests);
+
+      // dispatch search keyup event in 100ms
+      setTimeout(() => {
+        search.dispatchEvent(new Event("keyup"));
+      }, 100);
     }
     searchingStarted = false;
   } else {
@@ -435,7 +534,7 @@ function queueTimer(contests, searchString) {
     searchingDelay -= 100;
 
     setTimeout(function () {
-      queueTimer(contests, searchString);
+      queueTimer(contests, e);
     }, 100);
   }
 }
@@ -446,23 +545,33 @@ search.addEventListener("keyup", (e) => {
   const searchString = e.target.value.toLowerCase().trim();
   searchingDelay = 500;
   if (searchString.length > 0) {
+    searchCleared = false;
     if (searchString == currentSearchQuery || searching || searchString < 2) {
       return;
     }
 
     if (searchingStarted == false) {
       searchingStarted = true;
-      queueTimer(contests, searchString);
+      queueTimer(contests, e);
     }
   } else {
-    console.log("empty");
-    renderContests(contests);
+    searchCleared = true;
+    currentSearch.innerText = "";
     sortContests("time", false);
+    renderContests(contests);
   }
 });
 
+// search events all leads to keyup event
+input_box_events = ["paste", "cut"];
+input_box_events.forEach((event) => {
+  search.addEventListener(event, (e) => {
+    console.log("event", event);
+    search.dispatchEvent(new Event("keyup"));
+  });
+});
+
 // add event listeners to sort buttons
-const sortButtons = document.querySelectorAll(".sort");
 sortButtons.forEach((button) => {
   button.addEventListener("click", (e) => {
     let sort = e.target.parentElement.parentElement.innerText.toLowerCase();
@@ -550,6 +659,8 @@ function showSearchGuide() {
 // "/" key event listener to focus on search bar
 document.addEventListener("keydown", (e) => {
   if (e.key == "/") {
-    search.focus();
+    if (!searching) {
+      search.focus();
+    }
   }
 });
