@@ -4,8 +4,9 @@ import threading
 import re
 import json
 
+# https://codeforces.com/contests/page/2?complete=true
 
-url = "https://codeforces.com/contests/page/{}"
+url = "https://codeforces.com/contests/page/{}?complete=true"
 
 data = []
 
